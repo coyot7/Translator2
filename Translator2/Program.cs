@@ -68,8 +68,8 @@ namespace Translator2
                 }
                 if (string.IsNullOrEmpty(Input))
                     return null;
-                if (zmiana == false) throw new Exception("Syntax error position:" + Pos + " " + Input);
-                if (res.ElementType.Name == "Spacja") continue;
+                if (zmiana == false) throw new Exception("Blad skladni na pozycji: " + Pos + ": " + Input);
+                if (res.ElementType.Name == "whiteSpace") continue;
                 return res;
             }
         }
@@ -105,7 +105,7 @@ namespace Translator2
             Y();
         }
 
-        private void Y() //mnożenie, dzielenie
+        private void Y()
         {
             while (true)
             {
@@ -120,7 +120,7 @@ namespace Translator2
             }
         }
 
-        private void C() //liczby, zmienne
+        private void C()
         {
             if (_expectedElement.Name == "integer" ||
                 _expectedElement.Name == "float" ||
@@ -135,11 +135,27 @@ namespace Translator2
                 CheckCurrent(_lexer.GetElements.First(x => x.Name == "rp"));  //prawy nawias              
             }
             else
-                throw new Exception("Blad " + _expectedElement.Name);
+            {
+                string blad ="";
+                if (_expectedElement.Name == "multiplication")
+                    blad = "mnozenia";
+                else if (_expectedElement.Name == "division")
+                    blad = "dzielenia";
+                else if (_expectedElement.Name == "addidtion")
+                    blad = "dodawania";
+                else if (_expectedElement.Name == "substraction")
+                    blad = "odejmowania";
+                else if (_expectedElement.Name == "lp")
+                    blad = "lewego nawiasu";
+                else if (_expectedElement.Name == "rp")
+                    blad = "prawego nawiasu";
+                
+                throw new Exception("Blad " + blad);
+            }
 
         }
 
-        private void X() //dodawanie, odejmowanie
+        private void X() 
         {
             while (true)
             {
@@ -162,11 +178,11 @@ namespace Translator2
         {
             var tmp = _lexer.GetNextResult();
             if (tmp == null && _bracket > 0)
-                throw new Exception("Expected rp");
+                throw new Exception("Brak prawego nawiasu");
             if (tmp == null)
-                throw new Exception("Koniec");
+                throw new Exception("Operacja zakonczona sukcesem.");
             if (_bracket == 0 && tmp.ElementType.Name == "rp")
-                throw new Exception("Expected lp");
+                throw new Exception("Brak lewego nawiasu");
 
             _expectedElement = tmp.ElementType;
             _id++;
